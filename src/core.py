@@ -26,7 +26,7 @@ class SetManClient:
 
     def get_parameters(self, trimmable=True) -> ParametersResponse:
        response = self._get_request_and_handle_exception(self.url.format(self.EP_PARAMETERS)+'?trimmable=true')
-       return ParametersResponse(**response.json())
+       return ParametersResponse.from_dict(response.json())
 
     def get_resident_settings(self) -> list[Setting]:
         response = self._get_request_and_handle_exception(self.url.format(self.EP_RESIDENT_SETTINGS))

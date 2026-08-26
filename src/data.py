@@ -1,4 +1,3 @@
-
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
@@ -10,7 +9,7 @@ class Setting:
     last_updated: datetime
 
     @classmethod
-    def from_dict(cls, data):
+    def from_dict(cls, data) -> "Setting":
         return cls(
             parameter_name=data["parameter_name"],
             value=data["value"],
@@ -35,6 +34,17 @@ class ParametersResponse:
     page: Optional[int] = None
     size: Optional[int] = None
 
+    @classmethod
+    def from_dict(cls, data: dict) -> "ParametersResponse":
+        return cls(
+            parameters=[
+                Parameter(**parameter)
+                for parameter in data["parameters"]
+            ],
+            total=data["total"],
+            page=data.get("page"),
+            size=data.get("size"),
+        )
 
 @dataclass
 class Context:
