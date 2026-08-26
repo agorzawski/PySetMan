@@ -28,7 +28,7 @@ class SetManClient:
     EP_RESIDENT_SETTINGS = "/settings/resident"
     EP_RESIDENT_TRIM = "/trims/resident"
     
-    def __init__(self, ip, port=8000):
+    def __init__(self, ip:str='127.0.0.1', port:int=8000):
         self.url=f"http://{ip}:{port}{{}}"
 
     def send_trim(self, comment, values):
