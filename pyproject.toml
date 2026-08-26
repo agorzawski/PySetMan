@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "setman-client"
+version = "0.1.0"
+description = "A python client to SetMan Service"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+authors = [
+    { name = "arek", email = "agorzawski@gmail.com" }
+]
+dependencies = [
+    "requests>=2.31"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
