@@ -1,12 +1,16 @@
 from typing import Any
-
 import requests
 from data import Setting, ParametersResponse, Context
 
 APPLICATION_JSON = "application/json"
 
 """
-Simple client ONLY to act on resident context
+Simple client that covers:
+- get contexts
+- get parameters
+- get settings (from resident or any other context)
+- send trims (for resident or any other context)
+
 """
 class SetManClient:
 
@@ -23,6 +27,14 @@ class SetManClient:
         self.url=f"{protocol}://{ip}:{port}{{}}"
 
     def send_trim(self, comment: str, values: dict[str, float | int | str], context: Context = None,):
+        """
+        Sends a trim to the resident or any other context.
+
+        :param comment: comment/descrtion to be saved along the succesfull trim
+        :param values: dictionary of parameter -> value to be trimmed
+        :param context: context to act on, defaults (if None) is the resident
+        :return: json response from the server or raises exception if some issues were encountered.
+        """
         payload = {
             "comment": comment,
             "values": values,

@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from data import Setting, Parameter, ParametersResponse, Context
 
 PARAMETER_2_DICT_JSON = {
     "name": "PARAMETER_2",
@@ -6,18 +7,13 @@ PARAMETER_2_DICT_JSON = {
     "engineering_unit": "Tm",
     "skills": ["trimmable"],
 }
-
 PARAMETER_1_DICT_JSON = {
     "name": "PARAMETER_1",
     "parameter_type": "TYPE_1",
     "engineering_unit": "rad",
     "skills": ["trimmable"],
 }
-
 SOME_DATE_DATETIME = datetime(2026, 8, 26, 11, 24, 30, 20181, tzinfo=timezone.utc, )
-
-from data import Setting, Parameter, ParametersResponse, Context
-
 SOME_DATE_STRING = "2026-08-26T11:24:30.020181Z"
 JSON_DICT_SETTING = {
     "parameter_name": "PARAMETER_1",
