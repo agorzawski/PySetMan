@@ -1,3 +1,5 @@
+from typing import Any
+
 import requests
 from data import Setting, ParametersResponse, Context
 
@@ -11,10 +13,10 @@ class SetManClient:
     EP_RESIDENT_SETTINGS = "/settings/resident"
     EP_RESIDENT_TRIM = "/trims/resident"
     
-    def __init__(self, ip:str='127.0.0.1', port:int=8000):
-        self.url=f"http://{ip}:{port}{{}}"
+    def __init__(self, ip:str='127.0.0.1', port:int=8000, protocol:str='http'):
+        self.url=f"{protocol}://{ip}:{port}{{}}"
 
-    def send_trim(self, comment, values):
+    def send_trim(self, comment:str , values: dict[str, float | int | str] ):
         payload = {"comment": comment, 
                    "values": values,}   
         response = self._post_request_and_handle_exception(self.url.format(self.EP_RESIDENT_TRIM), payload)
@@ -24,7 +26,7 @@ class SetManClient:
         response = self._get_request_and_handle_exception(self.url.format(self.EP_CONTEXTS))
         return [Context.from_dict(context) for context in response.json()]
 
-    def get_parameters(self, trimmable=True) -> ParametersResponse:
+    def get_parameters(self, trimmable:bool=True) -> ParametersResponse:
        response = self._get_request_and_handle_exception(self.url.format(self.EP_PARAMETERS)+'?trimmable=true')
        return ParametersResponse.from_dict(response.json())
 
@@ -32,15 +34,18 @@ class SetManClient:
         response = self._get_request_and_handle_exception(self.url.format(self.EP_RESIDENT_SETTINGS))
         return [Setting.from_dict(setting) for setting in response.json()["settings"]]
 
+    def get_settings(self, context: Context):
+        pass
+
     @staticmethod
-    def _get_request_and_handle_exception(url):
+    def _get_request_and_handle_exception(url: str):
         response = requests.get(url, headers={"accept": "application/json"},)
         if response.status_code != 200:            
             raise ValueError(f"Request failed: HTTP {response.status_code} with response: {response.text}")
         return response
        
     @staticmethod
-    def _post_request_and_handle_exception(url, payload):
+    def _post_request_and_handle_exception(url:str, payload: dict[str, Any]):
         response = requests.post(
             url,
             headers={
