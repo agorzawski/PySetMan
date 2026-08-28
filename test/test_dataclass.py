@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from data import Setting, Parameter, ParametersResponse, Context
+from models.data import Setting, Parameter, ParametersResponse, Context
 
 PARAMETER_2_DICT_JSON = {
     "name": "PARAMETER_2",

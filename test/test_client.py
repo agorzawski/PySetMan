@@ -1,7 +1,7 @@
 from unittest.mock import Mock, patch
 import pytest
-from core import SetManClient
-from data import Context, Setting
+from setman.client import SetManClient
+from models.data import Context, Setting
 
 
 DEFAULT_HEADERS = {"accept": "application/json"}

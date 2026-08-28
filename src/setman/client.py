@@ -1,6 +1,6 @@
 from typing import Any
 import requests
-from data import Setting, ParametersResponse, Context
+from models.data import Setting, ParametersResponse, Context
 
 APPLICATION_JSON = "application/json"
 
