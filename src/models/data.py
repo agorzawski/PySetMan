@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
 
+
 @dataclass
 class Setting:
     parameter_name: str
@@ -46,6 +47,7 @@ class ParametersResponse:
             size=data.get("size"),
         )
 
+
 @dataclass
 class Context:
     name: str
@@ -68,4 +70,19 @@ class Context:
                 if data["resident_until"]
                 else None
             ),
+        )
+
+
+@dataclass
+class DriveResult:
+    success: bool
+    succeeded_parameters: dict[str, float]
+    failed_parameters: dict[str, float]
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "DriveResult":
+        return cls(
+            success=data["success"],
+            succeeded_parameters=data["succeeded_parameters"],
+            failed_parameters=data["failed_parameters"],
         )

@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "setman-client"
-version = "0.2.0"
+version = "0.2.1"
 description = "A Python client for the SetMan service"
 readme = "README.md"
 requires-python = ">=3.9"
 license = { file = "LICENSE" }
 authors = [
-    { name = "arek", email = "agorzawski@gmail.com" }
+    { name = "arek", email = "arek.gorzawski@extern.sckcen.be" }
 ]
 dependencies = [
     "requests>=2.31"

@@ -1,6 +1,6 @@
 from typing import Any
 import requests
-from models.data import Setting, ParametersResponse, Context
+from models.data import Setting, ParametersResponse, Context, DriveResult
 
 APPLICATION_JSON = "application/json"
 
@@ -22,9 +22,18 @@ class SetManClient:
 
     EP_TRIM = "/trims"
     EP_RESIDENT_TRIM = "/trims/resident"
+    EP_DRIVE_ALL = "/devices/drive"
 
     def __init__(self, ip:str='127.0.0.1', port:int=8000, protocol:str='http'):
         self.url=f"{protocol}://{ip}:{port}{{}}"
+
+    def drive_all(self) -> DriveResult:
+        """
+        Drive all resident settings
+        :return:
+        """
+        response = self._post_request_and_handle_exception(self.url.format(self.EP_DRIVE_ALL), payload={})
+        return DriveResult.from_dict(response.json())
 
     def send_trim(self, comment: str, values: dict[str, float | int | str], context: Context = None,):
         """
