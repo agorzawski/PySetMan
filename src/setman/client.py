@@ -1,6 +1,10 @@
 from typing import Any
 import requests
 from models.data import Setting, ParametersResponse, Context, DriveResult, Realm, Device, Rule
+from models.trim_history import TrimRecord
+from uuid import UUID
+from setman.endpoints import *
+from setman.response_codes import HTTP_RESPONSE_OK
 
 APPLICATION_JSON = "application/json"
 
@@ -14,20 +18,6 @@ class SetManClient:
     - drive all
 
     """
-    EP_REALMS = "/realms"
-    EP_PARAMETERS = "/parameters"
-    EP_CONTEXTS = "/contexts"
-    EP_DEVICES = "/devices"
-    EP_RULES = "/rules"
-
-
-    EP_SETTINGS = "/settings/context"
-    EP_RESIDENT_SETTINGS = "/settings/resident"
-
-    EP_TRIM = "/trims"
-    EP_RESIDENT_TRIM = "/trims/resident"
-    EP_DRIVE_ALL = "/devices/drive"
-
     def __init__(self, ip: str = '127.0.0.1', port: int = 8000, protocol: str = 'http'):
         self.url = f"{protocol}://{ip}:{port}{{}}"
 
@@ -37,10 +27,10 @@ class SetManClient:
         :param realm: for a given realm
         :return:
         """
-        params = self._get_params_for_request(realm)
-        response = self._post_request_and_handle_exception(self.url.format(self.EP_DRIVE_ALL), payload={},
-                                                           params=params)
-        return DriveResult.from_dict(response.json())
+        _params = self._get_params_for_request(realm)
+        _response = self._post_request_and_handle_exception(self.url.format(EP_DRIVE_ALL), payload={},
+                                                           params=_params)
+        return DriveResult.from_dict(_response.json())
 
     def send_trim(self,
                   comment: str,
@@ -60,48 +50,80 @@ class SetManClient:
         }
         params = {}
         if context is not None:
-            endpoint = self.url.format(self.EP_TRIM)
+            endpoint = self.url.format(EP_TRIM)
             params = {"context_name": context.name}
         else:
-            endpoint = self.url.format(self.EP_RESIDENT_TRIM)
-        response = self._post_request_and_handle_exception(endpoint, payload, params=params)
-        return response.json()
+            endpoint = self.url.format(EP_RESIDENT_TRIM)
+        _response = self._post_request_and_handle_exception(endpoint, payload, params=params)
+        return _response.json()
 
     def get_realms(self) -> list[Realm]:
-        response = self._get_request_and_handle_exception(self.url.format(self.EP_REALMS))
-        return [Realm.from_dict(realm) for realm in response.json()["realms"]]
+        _response = self._get_request_and_handle_exception(self.url.format(EP_REALMS))
+        return [Realm.from_dict(realm) for realm in _response.json()["realms"]]
 
     def get_contexts(self, realm: Realm | None = None) -> list[Context]:
-        params = self._get_params_for_request(realm)
-        response = self._get_request_and_handle_exception(self.url.format(self.EP_CONTEXTS), params=params)
-        return [Context.from_dict(context) for context in response.json()]
+        _params = self._get_params_for_request(realm)
+        _response = self._get_request_and_handle_exception(self.url.format(EP_CONTEXTS), params=_params)
+        return [Context.from_dict(context)
+                for context in _response.json()] # FIXME change in server to unify the response json
 
     def get_parameters(self, realm: Realm | None = None, trimmable: bool = True) -> ParametersResponse:
-        params = {"trimmable": str(trimmable)}
+        _params = {"trimmable": str(trimmable)}
         if realm is not None:
-            params["realm"] = realm.abbreviation
-        response = self._get_request_and_handle_exception(self.url.format(self.EP_PARAMETERS),
-                                                          params=params)
-        return ParametersResponse.from_dict(response.json())
+            _params["realm"] = realm.abbreviation
+        _response = self._get_request_and_handle_exception(self.url.format(EP_PARAMETERS),
+                                                          params=_params)
+        return ParametersResponse.from_dict(_response.json())
 
-    def get_resident_settings(self) -> list[Setting]:
-        response = self._get_request_and_handle_exception(self.url.format(self.EP_RESIDENT_SETTINGS))
-        return [Setting.from_dict(setting) for setting in response.json()["settings"]]
+    def get_resident_settings(self, realm: Realm | None = None) -> list[Setting]:
+        _params = self._get_params_for_request(realm)
+        _response = self._get_request_and_handle_exception(self.url.format(EP_RESIDENT_SETTINGS), params=_params)
+        return [Setting.from_dict(setting)
+                for setting in _response.json()["settings"]]
 
     def get_settings(self, context: str | Context) -> list[Setting]:
-        params = {"context_name": context.name if isinstance(context, Context) else context}
-        response = self._get_request_and_handle_exception(self.url.format(self.EP_SETTINGS), params=params)
-        return [Setting.from_dict(setting) for setting in response.json()["settings"]]
+        _params = {"context_name": context.name if isinstance(context, Context) else context}
+        _response = self._get_request_and_handle_exception(self.url.format(EP_SETTINGS), params=_params)
+        return [Setting.from_dict(setting)
+                for setting in _response.json()["settings"]]
 
     def get_devices(self, realm: Realm | None = None) -> list[Device]:
-        params = self._get_params_for_request(realm)
-        response = self._get_request_and_handle_exception(self.url.format(self.EP_DEVICES), params=params)
-        return [Device.from_dict(device) for device in response.json()]
+        _params = self._get_params_for_request(realm)
+        _response = self._get_request_and_handle_exception(self.url.format(EP_DEVICES), params=_params)
+        return [Device.from_dict(device)
+                for device in _response.json()] # FIXME change in server to unify the response json
 
     def get_rules(self, realm: Realm | None = None) -> list[Rule]:
-        params = self._get_params_for_request(realm)
-        response = self._get_request_and_handle_exception(self.url.format(self.EP_RULES), params=params)
-        return [Rule.from_dict(rule) for rule in response.json()["rules"]]
+        _params = self._get_params_for_request(realm)
+        _response = self._get_request_and_handle_exception(self.url.format(EP_RULES), params=_params)
+        return [Rule.from_dict(rule)
+                for rule in _response.json()["rules"]]
+
+    def get_trim_record(self, record_id: str | UUID) -> TrimRecord:
+        _response = self._get_request_and_handle_exception(self.url.format(EP_TRIM_HISTORY_ONE.format(record_id)))
+        return TrimRecord.from_dict(_response.json()) # FIXME change in server to unify the response json
+
+    def get_trim_records(self, context: str | Context | None = None, parameter_names: list[str] | None = None) -> list[TrimRecord]:
+        _response = None
+        _params = {"context": context.name if isinstance(context, Context) else context}
+        if parameter_names is None:
+            _response = self._get_request_and_handle_exception(self.url.format(EP_TRIM_HISTORY),
+                                                               params=_params)
+        else:
+            _params["parameter_names"] = parameter_names
+            print(_params)
+            _response = self._post_request_and_handle_exception(self.url.format(EP_TRIM_HISTORY),
+                                                                payload=_params,)
+
+        return [TrimRecord.from_dict(trim_history)
+                for trim_history in _response.json()["history"]]
+
+
+    def set_residency(self, context: str | Context | None, resident:bool) -> None:
+        _params = {"name": context.name if isinstance(context, Context) else context,
+                   "resident": resident}
+        print(_params)
+        self._put_request_and_handle_exception(self.url.format(EP_RESIDENCY), payload=_params)
 
     @staticmethod
     def _get_params_for_request(realm: Realm | None = None) -> dict[Any, Any]:
@@ -114,25 +136,43 @@ class SetManClient:
     def _get_request_and_handle_exception(url: str, params=None):
         if params is None:
             params = {}
-        response = requests.get(url, headers={"accept": APPLICATION_JSON},
+        _response = requests.get(url, headers={"accept": APPLICATION_JSON},
                                 params=params)
-        if response.status_code != 200:
-            raise ValueError(f"Request failed: HTTP {response.status_code} with response: {response.text}")
-        return response
+        if _response.status_code != HTTP_RESPONSE_OK:
+            raise SetManServerException(f"Request failed: HTTP {_response.status_code} with response: {_response.text}")
+        return _response
 
     @staticmethod
     def _post_request_and_handle_exception(url: str, payload: dict[str, Any], params=None):
         if params is None:
             params = {}
-        response = requests.post(
+        _response = requests.post(
             url,
             headers={
-                "accept": APPLICATION_JSON,
+                "accept": "*/*",
                 "Content-Type": APPLICATION_JSON,
             },
             params=params,
             json=payload,
         )
-        if response.status_code != 200:
-            raise ValueError(f"Request failed: HTTP {response.status_code} with response: {response.text}")
-        return response
+        if _response.status_code != HTTP_RESPONSE_OK:
+            raise SetManServerException(f"Request failed: HTTP {_response.status_code} with response: {_response.text}")
+        return _response
+
+    @staticmethod
+    def _put_request_and_handle_exception(url: str, payload: dict[str, Any]):
+        _response = requests.put(
+            url,
+            headers={
+                "accept": "*/*",
+                "Content-Type": APPLICATION_JSON,
+            },
+            json = payload
+        )
+        if _response.status_code != HTTP_RESPONSE_OK:
+            raise SetManServerException(f"Request failed: HTTP {_response.status_code} with response: {_response.text}")
+        return _response
+
+
+class SetManServerException(Exception):
+    """marker for server error"""

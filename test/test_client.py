@@ -1,8 +1,8 @@
 from unittest.mock import Mock, patch
 import pytest
-from setman.client import SetManClient
+from setman.client import SetManClient, SetManServerException
 from models.data import Context, Setting
-
+from setman.endpoints import EP_RESIDENT_SETTINGS, EP_CONTEXTS, EP_PARAMETERS
 
 DEFAULT_HEADERS = {"accept": "application/json"}
 DEFAULT_NO_PARAMS = {}
@@ -67,7 +67,7 @@ class TestSetManClient:
         assert isinstance(result[0], Context)
         assert result[0].name == "BLAH CONTEXT"
         assert result[0].resident is True
-        mock_get.assert_called_once_with(DEFAULT_PROTOCOL_ADDRESS.format(SetManClient.EP_CONTEXTS),
+        mock_get.assert_called_once_with(DEFAULT_PROTOCOL_ADDRESS.format(EP_CONTEXTS),
                                          headers=DEFAULT_HEADERS,
                                          params=DEFAULT_NO_PARAMS,)
 
@@ -79,7 +79,7 @@ class TestSetManClient:
         assert result.total == 2
         assert len(result.parameters) == 2
         assert result.parameters[0].name == "PARAMETER_BLAH_1"
-        mock_get.assert_called_once_with(DEFAULT_PROTOCOL_ADDRESS.format(SetManClient.EP_PARAMETERS),
+        mock_get.assert_called_once_with(DEFAULT_PROTOCOL_ADDRESS.format(EP_PARAMETERS),
                                          headers=DEFAULT_HEADERS,
                                          params={"trimmable": "True"},)
 
@@ -90,18 +90,18 @@ class TestSetManClient:
         assert len(result) == 1
         assert isinstance(result[0], Setting)
 
-        mock_get.assert_called_once_with(DEFAULT_PROTOCOL_ADDRESS.format(SetManClient.EP_RESIDENT_SETTINGS),
+        mock_get.assert_called_once_with(DEFAULT_PROTOCOL_ADDRESS.format(EP_RESIDENT_SETTINGS),
                                          headers=DEFAULT_HEADERS,
                                          params=DEFAULT_NO_PARAMS,)
 
     @patch("requests.get")
     def test_get_http_error(self, mock_get, client):
         mock_get.return_value = self.mock_response(status_code=500, text="Internal server error",)
-        with pytest.raises(ValueError, match="Request failed: HTTP 500",):
+        with pytest.raises(SetManServerException, match="Request failed: HTTP 500",):
             client.get_contexts()
 
     @patch("requests.post")
     def test_post_http_error(self, mock_post, client):
         mock_post.return_value = self.mock_response(status_code=400, text="Invalid trim",)
-        with pytest.raises(ValueError,match="Request failed: HTTP 400"):
+        with pytest.raises(SetManServerException,match="Request failed: HTTP 400"):
             client.send_trim(comment="Test", values={"PARAM": 1.5},)
