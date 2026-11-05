@@ -80,6 +80,28 @@ class Context:
             resident=bool(data["resident"]),
         )
 
+@dataclass(frozen=True)
+class ContextResidency:
+    id: UUID
+    context_id: UUID
+    context_name: str
+    realm: str
+    timestamp: datetime
+    event: str
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "ContextResidency":
+        return cls(
+            id=UUID(data["id"]),
+            context_name=data["context_name"],
+            context_id=UUID(data["context_id"]),
+            realm=data["realm"],
+            timestamp=datetime.fromisoformat(
+                data["timestamp"].replace("Z", "+00:00")
+            ),
+            event=data["event"],
+        )
+
 
 @dataclass
 class DriveResult:

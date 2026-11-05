@@ -1,6 +1,6 @@
 from typing import Any
 import requests
-from models.data import Setting, ParametersResponse, Context, DriveResult, Realm, Device, Rule
+from models.data import Setting, ParametersResponse, Context, DriveResult, Realm, Device, Rule, ContextResidency
 from models.trim_history import TrimRecord
 from uuid import UUID
 from setman.endpoints import *
@@ -66,6 +66,14 @@ class SetManClient:
         _response = self._get_request_and_handle_exception(self.url.format(EP_CONTEXTS), params=_params)
         return [Context.from_dict(context)
                 for context in _response.json()] # FIXME change in server to unify the response json
+
+    def get_context_residency_history(self, realm: Realm | None = None, context: Context | None = None) -> list[ContextResidency]:
+        _params = self._get_params_for_request(realm)
+        _params["context"] = context.name if isinstance(context, Context) else context
+        _response = self._get_request_and_handle_exception(self.url.format(EP_RESIDENCY_HISTORY),
+                                                          params=_params)
+        return [ContextResidency.from_dict(context) for context in _response.json()["history"]]
+
 
     def get_parameters(self, realm: Realm | None = None, trimmable: bool = True) -> ParametersResponse:
         _params = {"trimmable": str(trimmable)}

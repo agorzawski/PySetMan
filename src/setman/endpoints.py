@@ -11,6 +11,7 @@ EP_PARAMETERS = "/parameters"
 # /contexts
 EP_CONTEXTS = "/contexts"
 EP_RESIDENCY = "/contexts/resident"
+EP_RESIDENCY_HISTORY = "/contexts/resident/history"
 
 # /rules
 EP_RULES = "/rules"
