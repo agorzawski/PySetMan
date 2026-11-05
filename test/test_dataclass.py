@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from models.data import Setting, Parameter, ParametersResponse, Context
+from models.data import Setting, Parameter, ParametersResponse, Context, Realm
 
 PARAMETER_2_DICT_JSON = {
     "name": "PARAMETER_2",
@@ -23,6 +23,19 @@ JSON_DICT_SETTING = {
 RANDOM_ID_1 = "7202082a-38f5-424e-9416-3af62758dd34"
 RANDOM_ID_2 = "87e21853-2b65-4e51-93c7-7f2a4156b26e"
 RANDOM_ID_3 = "4248d809-fb82-4d79-9e00-803ef197cf97"
+
+JSON_DICT_REALM = {
+    "name": "REALM_1" ,
+    "abbreviation": "R1",
+    "description": "REALM_1 is the best",
+}
+
+
+class TestRealm:
+
+    def test_from_dict(self):
+        result = Realm.from_dict(JSON_DICT_REALM)
+        assert result.name == "REALM_1"
 
 class TestSetting:
 

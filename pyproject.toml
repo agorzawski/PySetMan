@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "setman-client"
-version = "0.2.1"
+version = "0.3.0"
 description = "A Python client for the SetMan service"
 readme = "README.md"
 requires-python = ">=3.9"
