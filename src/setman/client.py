@@ -1,6 +1,6 @@
-from typing import Any
+from typing import Any, List
 import requests
-from models.data import Setting, ParametersResponse, Context, DriveResult
+from models.data import Setting, ParametersResponse, Context, DriveResult, Realm
 
 APPLICATION_JSON = "application/json"
 
@@ -27,15 +27,21 @@ class SetManClient:
     def __init__(self, ip:str='127.0.0.1', port:int=8000, protocol:str='http'):
         self.url=f"{protocol}://{ip}:{port}{{}}"
 
-    def drive_all(self) -> DriveResult:
+    def drive_all(self, realm:Realm | None = None) -> DriveResult:
         """
         Drive all resident settings
         :return:
         """
-        response = self._post_request_and_handle_exception(self.url.format(self.EP_DRIVE_ALL), payload={})
+        params = self._get_params_for_request(realm)
+        response = self._post_request_and_handle_exception(self.url.format(self.EP_DRIVE_ALL), payload={}, params=params)
         return DriveResult.from_dict(response.json())
 
-    def send_trim(self, comment: str, values: dict[str, float | int | str], context: Context = None,):
+
+
+    def send_trim(self,
+                  comment: str,
+                  values: dict[str, float | int | str],
+                  context: Context | None = None) -> ParametersResponse:
         """
         Sends a trim to the resident or any other context.
 
@@ -57,12 +63,15 @@ class SetManClient:
         response = self._post_request_and_handle_exception(endpoint, payload, params=params)
         return response.json()
 
-    def get_contexts(self):
-        response = self._get_request_and_handle_exception(self.url.format(self.EP_CONTEXTS))
+    def get_contexts(self, realm: Realm | None = None) -> List[Context]:
+        params = self._get_params_for_request(realm)
+        response = self._get_request_and_handle_exception(self.url.format(self.EP_CONTEXTS), params=params)
         return [Context.from_dict(context) for context in response.json()]
 
-    def get_parameters(self, trimmable:bool=True) -> ParametersResponse:
+    def get_parameters(self, realm:Realm | None = None, trimmable:bool=True) -> ParametersResponse:
        params = {"trimmable":str(trimmable)}
+       if realm is not None:
+           params["realm"] = realm.abbreviation
        response = self._get_request_and_handle_exception(self.url.format(self.EP_PARAMETERS),
                                                          params=params)
        return ParametersResponse.from_dict(response.json())
@@ -75,6 +84,13 @@ class SetManClient:
         params = {"context_name": context.name if isinstance(context, Context) else context}
         response = self._get_request_and_handle_exception(self.url.format(self.EP_SETTINGS), params=params)
         return [Setting.from_dict(setting) for setting in response.json()["settings"]]
+
+    @staticmethod
+    def _get_params_for_request(realm: Realm | None = None) -> dict[Any, Any]:
+        params = {}
+        if realm is not None:
+            params["realm"] = realm.abbreviation
+        return params
 
     @staticmethod
     def _get_request_and_handle_exception(url: str, params=None):

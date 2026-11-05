@@ -37,10 +37,10 @@ JSON_RESPONSE_TWO_PARAMETERS = {
 }
 JSON_RESPONSE_ONE_CONTEXT = [
     {
+        "id": "4248d809-fb82-4d79-9e00-803ef197cf97",
         "name": "BLAH CONTEXT",
+        "realm": "ACC",
         "resident": True,
-        "resident_since": "2026-08-26T11:24:30.020181Z",
-        "resident_until": None,
     },
 ]
 

@@ -20,7 +20,9 @@ JSON_DICT_SETTING = {
     "value": 1.234,
     "last_updated": SOME_DATE_STRING,
 }
-
+RANDOM_ID_1 = "7202082a-38f5-424e-9416-3af62758dd34"
+RANDOM_ID_2 = "87e21853-2b65-4e51-93c7-7f2a4156b26e"
+RANDOM_ID_3 = "4248d809-fb82-4d79-9e00-803ef197cf97"
 
 class TestSetting:
 
@@ -79,39 +81,25 @@ class TestContext:
 
     def test_from_dict_resident(self):
         data = {
+            "id": RANDOM_ID_1,
             "name": "CONTEXT_1",
+            "realm": "ACC",
             "resident": True,
-            "resident_since": SOME_DATE_STRING,
-            "resident_until": None,
         }
 
         result = Context.from_dict(data)
         assert result.name == "CONTEXT_1"
         assert result.resident is True
-        assert result.resident_since == SOME_DATE_DATETIME
-        assert result.resident_until is None
 
     def test_from_dict_non_resident(self):
         data = {
+            "id": RANDOM_ID_2,
             "name": "CONTEXT_2",
+            "realm": "ACC",
             "resident": False,
-            "resident_since": None,
-            "resident_until": None,
         }
 
         result = Context.from_dict(data)
         assert result.name == "CONTEXT_2"
         assert result.resident is False
-        assert result.resident_since is None
-        assert result.resident_until is None
 
-
-    def test_from_dict_with_resident_until(self):
-        data = {
-            "name": "CONTEXT_3",
-            "resident": False,
-            "resident_since": SOME_DATE_STRING,
-            "resident_until": SOME_DATE_STRING,
-        }
-        result = Context.from_dict(data)
-        assert result.resident_since == SOME_DATE_DATETIME

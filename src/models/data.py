@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
+from uuid import UUID
 
 
-@dataclass
+@dataclass(frozen=True, eq=True)
 class Setting:
     parameter_name: str
     value: float
@@ -20,7 +21,22 @@ class Setting:
         )
 
 
-@dataclass
+@dataclass(frozen=True, eq=True)
+class Realm:
+    name: str
+    abbreviation: str
+    description: str
+
+    @classmethod
+    def from_dict(cls, data) -> "Realm":
+        return cls(
+            name=data["name"],
+            abbreviation=data["abbreviation"],
+            description=data["description"],
+        )
+
+
+@dataclass(frozen=True, eq=True)
 class Parameter:
     name: str
     parameter_type: str
@@ -28,7 +44,7 @@ class Parameter:
     skills: list[str]
 
 
-@dataclass
+@dataclass(frozen=True, eq=True)
 class ParametersResponse:
     parameters: list[Parameter]
     total: int
@@ -48,28 +64,20 @@ class ParametersResponse:
         )
 
 
-@dataclass
+@dataclass(frozen=True, eq=True)
 class Context:
+    id: UUID
     name: str
+    realm: str
     resident: bool
-    resident_since: datetime | None = None
-    resident_until: datetime | None = None
 
     @classmethod
     def from_dict(cls, data):
         return cls(
+            id=UUID(data["id"]),
             name=data["name"],
+            realm=data["realm"],
             resident=bool(data["resident"]),
-            resident_since=(
-                datetime.fromisoformat(data["resident_since"].replace("Z", "+00:00"))
-                if data["resident_since"]
-                else None
-            ),
-            resident_until=(
-                datetime.fromisoformat(data["resident_until"].replace("Z", "+00:00"))
-                if data["resident_until"]
-                else None
-            ),
         )
 
 
