@@ -94,3 +94,36 @@ class DriveResult:
             succeeded_parameters=data["succeeded_parameters"],
             failed_parameters=data["failed_parameters"],
         )
+
+
+@dataclass(frozen=True, eq=True)
+class Rule:
+    type: str
+    input_parameters: list[str]
+    output_parameters: list[str]
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "Rule":
+        return cls(
+            type=data["type"],
+            input_parameters=data["input_parameters"],
+            output_parameters=data["output_parameters"],
+            )
+
+@dataclass(frozen=True, eq=True)
+class Device:
+    adapter_type: str
+    input_parameter_name: str
+    device_setpoint_name: str
+    device_readback_name: str
+    device_acquired_name: str
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "Device":
+        return cls(
+            adapter_type=data["adapter_type"],
+            input_parameter_name=data["input_parameter_name"],
+            device_setpoint_name=data["device_setpoint_name"],
+            device_readback_name=data["device_readback_name"],
+            device_acquired_name=data["device_acquired_name"],
+        )
