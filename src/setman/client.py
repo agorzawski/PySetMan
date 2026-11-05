@@ -1,10 +1,11 @@
+import logging
 from typing import Any
 import requests
 from models.data import Setting, ParametersResponse, Context, DriveResult, Realm, Device, Rule, ContextResidency
 from models.trim_history import TrimRecord
 from uuid import UUID
 from setman.endpoints import *
-from setman.response_codes import HTTP_RESPONSE_OK
+from setman.response_codes import HTTP_RESPONSE_OK, HTTP_RESPONSE_404
 
 APPLICATION_JSON = "application/json"
 
@@ -18,8 +19,12 @@ class SetManClient:
     - drive all
 
     """
+    logger = logging.getLogger(__name__)
+
     def __init__(self, ip: str = '127.0.0.1', port: int = 8000, protocol: str = 'http'):
         self.url = f"{protocol}://{ip}:{port}{{}}"
+        self._verify_connection(ip, port, self.url.format(""))
+
 
     def drive_all(self, realm: Realm | None = None) -> DriveResult:
         """
@@ -132,6 +137,14 @@ class SetManClient:
                    "resident": resident}
         print(_params)
         self._put_request_and_handle_exception(self.url.format(EP_RESIDENCY), payload=_params)
+
+    def _verify_connection(self, ip: str, port: int, url: str):
+        _response = requests.get(url, headers={"accept": APPLICATION_JSON})
+        if _response.status_code == HTTP_RESPONSE_404 and "Not Found" in _response.json().get("detail"):
+            # The above is the default response on the system being UP and running despite 404 and Not Found...
+            self.logger.info("Server connected!")
+        else:
+            self.logger.error(f"Server connection failed! Verify if {ip}:{port} is reachable")
 
     @staticmethod
     def _get_params_for_request(realm: Realm | None = None) -> dict[Any, Any]:
