@@ -2,6 +2,9 @@ import logging
 from typing import Any
 import requests
 from models.data import Setting, ParametersResponse, Context, DriveResult, Realm, Device, Rule, ContextResidency
+from models.factory import realm_from_dict, context_residency_from_dict, context_from_dict, \
+    parameter_response_from_dict, setting_from_dict, device_from_dict, rule_from_dict, trim_record_from_dict, \
+    drive_result_from_dict
 from models.trim_history import TrimRecord
 from uuid import UUID
 from setman.endpoints import *
@@ -35,7 +38,7 @@ class SetManClient:
         _params = self._get_params_for_request(realm)
         _response = self._post_request_and_handle_exception(self.url.format(EP_DRIVE_ALL), payload={},
                                                            params=_params)
-        return DriveResult.from_dict(_response.json())
+        return drive_result_from_dict(_response.json())
 
     def send_trim(self,
                   comment: str,
@@ -64,12 +67,12 @@ class SetManClient:
 
     def get_realms(self) -> list[Realm]:
         _response = self._get_request_and_handle_exception(self.url.format(EP_REALMS))
-        return [Realm.from_dict(realm) for realm in _response.json()["realms"]]
+        return [realm_from_dict(realm) for realm in _response.json()["realms"]]
 
     def get_contexts(self, realm: Realm | None = None) -> list[Context]:
         _params = self._get_params_for_request(realm)
         _response = self._get_request_and_handle_exception(self.url.format(EP_CONTEXTS), params=_params)
-        return [Context.from_dict(context)
+        return [context_from_dict(context)
                 for context in _response.json()] # FIXME change in server to unify the response json
 
     def get_context_residency_history(self, realm: Realm | None = None, context: Context | None = None) -> list[ContextResidency]:
@@ -77,7 +80,7 @@ class SetManClient:
         _params["context"] = context.name if isinstance(context, Context) else context
         _response = self._get_request_and_handle_exception(self.url.format(EP_RESIDENCY_HISTORY),
                                                           params=_params)
-        return [ContextResidency.from_dict(context) for context in _response.json()["history"]]
+        return [context_residency_from_dict(context) for context in _response.json()["history"]]
 
 
     def get_parameters(self, realm: Realm | None = None, trimmable: bool = True) -> ParametersResponse:
@@ -86,35 +89,35 @@ class SetManClient:
             _params["realm"] = realm.abbreviation
         _response = self._get_request_and_handle_exception(self.url.format(EP_PARAMETERS),
                                                           params=_params)
-        return ParametersResponse.from_dict(_response.json())
+        return parameter_response_from_dict(_response.json())
 
     def get_resident_settings(self, realm: Realm | None = None) -> list[Setting]:
         _params = self._get_params_for_request(realm)
         _response = self._get_request_and_handle_exception(self.url.format(EP_RESIDENT_SETTINGS), params=_params)
-        return [Setting.from_dict(setting)
+        return [setting_from_dict(setting)
                 for setting in _response.json()["settings"]]
 
     def get_settings(self, context: str | Context) -> list[Setting]:
         _params = {"context_name": context.name if isinstance(context, Context) else context}
         _response = self._get_request_and_handle_exception(self.url.format(EP_SETTINGS), params=_params)
-        return [Setting.from_dict(setting)
+        return [setting_from_dict(setting)
                 for setting in _response.json()["settings"]]
 
     def get_devices(self, realm: Realm | None = None) -> list[Device]:
         _params = self._get_params_for_request(realm)
         _response = self._get_request_and_handle_exception(self.url.format(EP_DEVICES), params=_params)
-        return [Device.from_dict(device)
+        return [device_from_dict(device)
                 for device in _response.json()] # FIXME change in server to unify the response json
 
     def get_rules(self, realm: Realm | None = None) -> list[Rule]:
         _params = self._get_params_for_request(realm)
         _response = self._get_request_and_handle_exception(self.url.format(EP_RULES), params=_params)
-        return [Rule.from_dict(rule)
+        return [rule_from_dict(rule)
                 for rule in _response.json()["rules"]]
 
     def get_trim_record(self, record_id: str | UUID) -> TrimRecord:
         _response = self._get_request_and_handle_exception(self.url.format(EP_TRIM_HISTORY_ONE.format(record_id)))
-        return TrimRecord.from_dict(_response.json()) # FIXME change in server to unify the response json
+        return trim_record_from_dict(_response.json()) # FIXME change in server to unify the response json
 
     def get_trim_records(self, context: str | Context | None = None, parameter_names: list[str] | None = None) -> list[TrimRecord]:
         _response = None
@@ -128,7 +131,7 @@ class SetManClient:
             _response = self._post_request_and_handle_exception(self.url.format(EP_TRIM_HISTORY),
                                                                 payload=_params,)
 
-        return [TrimRecord.from_dict(trim_history)
+        return [trim_record_from_dict(trim_history)
                 for trim_history in _response.json()["history"]]
 
 
